@@ -32,7 +32,7 @@ var DEFAULT_URL = "../../web/compressed.tracemonkey-pldi-09.pdf";
 var DEFAULT_SCALE_DELTA = 1.1;
 var MIN_SCALE = 0.25;
 var MAX_SCALE = 10.0;
-var DEFAULT_SCALE_VALUE = "auto";
+var DEFAULT_SCALE_VALUE = "page-width";
 
 var PDFViewerApplication = {
   pdfLoadingTask: null,
@@ -47,13 +47,13 @@ var PDFViewerApplication = {
    * @returns {Promise} - Returns the promise, which is resolved when document
    *                      is opened.
    */
-  open: function (params) {
+  openPdf: function (params) {
     if (this.pdfLoadingTask) {
       // We need to destroy already opened document
       return this.close().then(
         function () {
           // ... and repeat the open() call.
-          return this.open(params);
+          return this.openPdf(params);
         }.bind(this)
       );
     }
@@ -186,17 +186,17 @@ var PDFViewerApplication = {
       // Provides some basic debug information
       console.log(
         "PDF " +
-          pdfDocument.fingerprint +
-          " [" +
-          info.PDFFormatVersion +
-          " " +
-          (info.Producer || "-").trim() +
-          " / " +
-          (info.Creator || "-").trim() +
-          "]" +
-          " (PDF.js: " +
-          (pdfjsLib.version || "-") +
-          ")"
+        pdfDocument.fingerprint +
+        " [" +
+        info.PDFFormatVersion +
+        " " +
+        (info.Producer || "-").trim() +
+        " / " +
+        (info.Creator || "-").trim() +
+        "]" +
+        " (PDF.js: " +
+        (pdfjsLib.version || "-") +
+        ")"
       );
 
       var pdfTitle;
@@ -385,6 +385,12 @@ var PDFViewerApplication = {
       PDFViewerApplication.zoomOut();
     });
 
+    document.getElementById("load").addEventListener("click", function () {
+      PDFViewerApplication.openPdf({
+        url: DEFAULT_URL,
+      });
+    });
+
     document
       .getElementById("pageNumber")
       .addEventListener("click", function () {
@@ -444,7 +450,7 @@ document.addEventListener(
 
 // We need to delay opening until all HTML is loaded.
 PDFViewerApplication.animationStartedPromise.then(function () {
-  PDFViewerApplication.open({
+  PDFViewerApplication.openPdf({
     url: DEFAULT_URL,
   });
 });
